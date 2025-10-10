@@ -12,6 +12,7 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
+       
         return Inertia::render('Auth/Login');
     }
 
@@ -29,7 +30,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('home');
+            return redirect()->route('generate');
         }
 
         return back()->withErrors([
@@ -53,7 +54,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('home');
+        return redirect()->route('generate');
     }
 
     public function logout(Request $request)
