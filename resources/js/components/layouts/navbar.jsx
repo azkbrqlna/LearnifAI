@@ -41,11 +41,11 @@ export default function NavbarLayout({ children }) {
                 <div className="flex items-center gap-4">
                     {!user ? (
                         <>
-                            <Button className="bg-pink-400">
+                            <Button className="bg-secondary dark:text-white">
                                 <Link href="/login">Login</Link>
                             </Button>
-                            <Button className="bg-green-400">
-                                <Link href="/register">Register</Link>
+                            <Button>
+                                <Link href="/register">Sign Up</Link>
                             </Button>
                             <ThemeMode />
                         </>

@@ -34,7 +34,7 @@ export default function CoursesPage() {
                                                 {course.description}
                                             </p>
                                             <p className="text-xs text-gray-400 mt-2">
-                                                Dibuat pada:{" "}
+                                                Created at:{" "}
                                                 {new Date(
                                                     course.created_at
                                                 ).toLocaleDateString("en-US", {
