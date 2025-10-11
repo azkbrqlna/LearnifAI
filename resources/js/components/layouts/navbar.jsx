@@ -34,7 +34,7 @@ export default function NavbarLayout({ children }) {
     return (
         <div>
             <nav className="w-full flex items-center justify-between px-6 py-4 bg-secondary-background border-border border-b-3">
-                <div className="text-2xl font-heading font-extrabold tracking-tight">
+                <div className="text-2xl font-bold tracking-tight">
                     LearnifAI
                 </div>
 
@@ -51,6 +51,18 @@ export default function NavbarLayout({ children }) {
                         </>
                     ) : (
                         <>
+                            <Link
+                                href="/generate"
+                                className="font-bold transition-all duration-200 hover:-translate-y-0.5"
+                            >
+                                Generate
+                            </Link>
+                            <Link
+                                href="/courses"
+                                className="font-bold transition-all duration-200 hover:-translate-y-0.5"
+                            >
+                                MyCourse
+                            </Link>
                             <ThemeMode />
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>

@@ -15,11 +15,14 @@ export default function CoursesIndex() {
 
     return (
         <>
+            <Head title="My Courses" />
             <NavbarLayout>
-                <h1 className="text-2xl font-bold mb-6">My Courses</h1>
+                <h1 className="text-2xl font-bold mb-6 justify-center text-center">
+                    My Courses
+                </h1>
 
                 {courses.length === 0 ? (
-                    <p className="text-gray-600">
+                    <p className="justify-center text-center">
                         Belum ada course. Silakan generate dulu 🚀
                     </p>
                 ) : (

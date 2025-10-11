@@ -15,11 +15,10 @@ class CourseController extends Controller
         return Inertia::render('Generate');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-         $user = auth()->user();
+        $user = $request->user();
 
-        // Ambil hanya course milik user yang sedang login
         $courses = Course::where('user_id', $user->id)->get();
 
         return Inertia::render('Courses/Index', [
@@ -36,9 +35,8 @@ class CourseController extends Controller
             'topic' => 'required|string',
         ]);
 
-        $prompt = "Buatkan 5 judul kursus tentang '{$request->topic}' dengan format JSON array seperti contoh berikut:\n\n" .
+        $prompt = "Buatkan 3 judul kursus tentang '{$request->topic}' dengan format JSON array seperti contoh berikut:\n\n" .
             "[{\"title\": \"Judul Kursus 1\", \"description\": \"Deskripsi singkat kursus 1\"}, " .
-            "{\"title\": \"Judul Kursus 2\", \"description\": \"Deskripsi singkat kursus 2\"}]\n\n" .
             "Hanya kembalikan JSON array tanpa teks lain.";
 
         $response = Http::timeout(60)->withHeaders([

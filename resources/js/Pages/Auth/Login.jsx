@@ -22,7 +22,6 @@ export default function LoginForm() {
 
         setLocalErrors(validationErrors);
 
-        // Submit ke server jika tidak ada error
         if (Object.keys(validationErrors).length === 0) {
             post("/login");
         }

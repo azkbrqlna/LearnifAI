@@ -3,11 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
-
 :root {
     --background: oklch(94.27% 0.0268 242.57);
     --secondary-background: oklch(100% 0 0);
