@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\LibraryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,7 +17,9 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware(['auth', 'web'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+    Route::get('/courses/{slug}', [CourseController::class, 'index'])->name('courses.index');
     Route::get('/generate', [CourseController::class, 'generatePage'])->name('generate');
     Route::post('/generate', [CourseController::class, 'generateCourse']);
+    
+    Route::get('/library', [LibraryController::class, 'index'])->name('library');
 });

@@ -12,7 +12,7 @@ export default function LandingPage() {
             <section className="flex flex-col items-center justify-center text-center px-6  py-16">
                 <Card className="max-w-3xl w-full border-3 bg-secondary-background p-8">
                     <CardHeader>
-                        <h1 className="text-4xl md:text-6xl font-heading font-extrabold leading-tight">
+                        <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                             Belajar Cepat dengan <br />
                             <span className="text-main">LearnifAI</span>
                         </h1>

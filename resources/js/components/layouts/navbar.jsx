@@ -58,10 +58,10 @@ export default function NavbarLayout({ children }) {
                                 Generate
                             </Link>
                             <Link
-                                href="/courses"
+                                href="/library"
                                 className="font-bold transition-all duration-200 hover:-translate-y-0.5"
                             >
-                                MyCourse
+                                Library
                             </Link>
                             <ThemeMode />
                             <DropdownMenu>

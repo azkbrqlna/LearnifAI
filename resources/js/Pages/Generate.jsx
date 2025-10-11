@@ -29,7 +29,7 @@ export default function GeneratePage() {
             <Head title="Generate Course" />
 
             <div className="max-w-xl mx-auto mt-10">
-                <Card className="border-3 border-border shadow-sm bg-secondary-background">
+                <Card className="border-3 bg-secondary-background">
                     <CardHeader>
                         <CardTitle className="text-2xl font-bold text-center">
                             Generate Course
@@ -38,9 +38,9 @@ export default function GeneratePage() {
 
                     <CardContent>
                         <p className="text-muted-foreground text-center mb-6">
-                            Ketik topik yang ingin kamu pelajari. LearnifAI akan
-                            otomatis membuatkan kursus, modul, materi, dan quiz
-                            untukmu 🎓
+                            Type the topic you want to learn. LearnifAI will
+                            automatically create a complete course, including
+                            modules, materials, and quizzes for you
                         </p>
 
                         <form
@@ -50,7 +50,7 @@ export default function GeneratePage() {
                             <Input
                                 type="text"
                                 name="topic"
-                                placeholder="Contoh: Belajar React JS dari dasar"
+                                placeholder="Example: Learn React from Scratch"
                                 value={data.topic}
                                 onChange={(e) =>
                                     setData("topic", e.target.value)

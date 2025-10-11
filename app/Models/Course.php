@@ -6,10 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
-     protected $fillable = ['title', 'description', 'user_id'];
+    protected $fillable = [
+        'title',
+        'slug',
+        'description',
+        'user_id',
+    ];
 
-      public function user()
+    public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function course_modules()
+    {
+        return $this->hasMany(CourseModule::class);
     }
 }

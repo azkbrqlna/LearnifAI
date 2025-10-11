@@ -16,7 +16,7 @@ export default function AuthCard({ title, subtitle, children }) {
             </div>
             <Card className="w-full max-w-md border-3 bg-secondary-background">
                 <CardHeader>
-                    <CardTitle className="text-center text-3xl font-heading font-extrabold">
+                    <CardTitle className="text-center text-3xl font-bold">
                         {title}
                     </CardTitle>
                     <p className="text-center text-sm mt-2 text-foreground">

@@ -1,61 +1,61 @@
 import React from "react";
-import { Head, Link, usePage } from "@inertiajs/react";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Head, usePage } from "@inertiajs/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import NavbarLayout from "@/components/layouts/navbar";
 
-export default function CoursesIndex() {
-    const { courses } = usePage().props;
+export default function CourseDetail() {
+    const { course, course_modules } = usePage().props;
 
     return (
         <>
-            <Head title="My Courses" />
+            <Head title={course.title} />
             <NavbarLayout>
-                <h1 className="text-2xl font-bold mb-6 justify-center text-center">
-                    My Courses
-                </h1>
-
-                {courses.length === 0 ? (
-                    <p className="justify-center text-center">
-                        Belum ada course. Silakan generate dulu 🚀
-                    </p>
-                ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {courses.map((course) => (
-                            <Card
-                                key={course.id}
-                                className="flex flex-col bg-secondary-background"
-                            >
-                                <CardHeader>
-                                    <CardTitle className="text-lg">
-                                        {course.title}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm ">
-                                        {course.description}
-                                    </p>
-                                </CardContent>
-                                <CardFooter className="mt-auto">
-                                    <Link
-                                        href={`/courses/${course.id}`}
-                                        className="w-full"
-                                    >
-                                        <Button className="w-full">
-                                            Start Course
-                                        </Button>
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        ))}
+                <div className="px-8">
+                    {/* Course Info */}
+                    <div className="mb-6">
+                        <h1 className="text-xl font-bold mb-3">
+                            {course.title}
+                        </h1>
+                        <p className="text-base">{course.description}</p>
                     </div>
-                )}
+
+                    {course_modules.length === 0 ? (
+                        <p className="text-center text-gray-500">
+                            Tidak ada module untuk kursus ini.
+                        </p>
+                    ) : (
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {course_modules.map((module) => (
+                                <Card
+                                    key={module.id}
+                                    className="bg-secondary-background border-3"
+                                >
+                                    <CardHeader>
+                                        <CardTitle>{module.title}</CardTitle>
+                                    </CardHeader>
+
+                                    <CardContent className="flex flex-col justify-between flex-grow">
+                                        <p className="text-sm mb-4 ">
+                                            {module.description}
+                                        </p>
+
+                                        <div className="mt-auto flex justify-end">
+                                            <Button
+                                                size="sm"
+                                                onClick={() =>
+                                                    alert("Mulai belajar 🚀")
+                                                }
+                                            >
+                                                Start Course
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </NavbarLayout>
         </>
     );
