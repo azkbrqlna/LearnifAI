@@ -13,7 +13,7 @@ class LibraryController extends Controller
         $user = $request->user();
 
         $courses = Course::where('user_id', $user->id)
-            ->latest()
+            ->latest()  
             ->get();
 
         return Inertia::render('Courses/Library', [

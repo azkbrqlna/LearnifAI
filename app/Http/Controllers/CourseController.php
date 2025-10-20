@@ -11,17 +11,12 @@ use Inertia\Inertia;
 
 class CourseController extends Controller
 {
-    /**
-     * Halaman form generate course.
-     */
+ 
     public function generatePage()
     {
         return Inertia::render('Generate');
     }
 
-    /**
-     * Daftar semua course milik user.
-     */
     public function index(Request $request, $slug)
     {
         $user = $request->user();
