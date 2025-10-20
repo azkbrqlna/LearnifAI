@@ -15,6 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_modules_id')->constrained('course_modules')->onDelete('cascade');
             $table->string('title');
+            $table->string('slug')->index();
+            $table->timestamps();
+        });
+
+        Schema::create('materials', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('module_id')->constrained('modules')->onDelete('cascade');
+            $table->string('title');
+            $table->text('content')->nullable();
             $table->timestamps();
         });
     }
@@ -25,5 +34,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('modules');
+        Schema::dropIfExists('materials');
     }
 };

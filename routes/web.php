@@ -3,6 +3,7 @@
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LibraryController;
+use App\Http\Controllers\ModuleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -22,4 +23,12 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::post('/generate', [CourseController::class, 'generateCourse']);
     
     Route::get('/library', [LibraryController::class, 'index'])->name('library');
+
+
+   Route::post('/modules/generate', [ModuleController::class, 'generateModule'])
+    ->name('modules.generate');
+
+    Route::get('/courses/{course_slug}/{module_slug}', [ModuleController::class, 'index'])
+    ->name('modules.index');
+
 });
