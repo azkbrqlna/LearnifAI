@@ -5,11 +5,9 @@ import NavbarLayout from "@/components/layouts/navbar";
 
 export default function LandingPage() {
     return (
-        <div className="min-h-screen relative">
-            <NavbarLayout />
-
-            {/* Hero Section */}
-            <section className="flex flex-col items-center justify-center text-center px-6  py-16">
+        <NavbarLayout>
+            {/* Hero Section dibungkus DI DALAM NavbarLayout */}
+            <section className="flex flex-col items-center justify-center text-center px-6 py-16 min-h-[calc(100vh-100px)]">
                 <Card className="max-w-3xl w-full border-3 bg-secondary-background p-8">
                     <CardHeader>
                         <h1 className="text-4xl md:text-6xl font-bold leading-tight">
@@ -26,13 +24,13 @@ export default function LandingPage() {
                         </p>
 
                         <div className="mt-8 flex flex-col md:flex-row justify-center gap-4">
-                            <Button>
+                            <Button asChild>
                                 <Link href="/generate">Mulai Belajar</Link>
                             </Button>
                         </div>
                     </CardContent>
                 </Card>
             </section>
-        </div>
+        </NavbarLayout>
     );
 }

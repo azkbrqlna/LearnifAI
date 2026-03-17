@@ -32,10 +32,11 @@ export default function NavbarLayout({ children }) {
     };
 
     return (
-        <div>
-            <nav className="w-full flex items-center justify-between px-6 py-4 bg-secondary-background border-border border-b-3">
+        <div className="min-h-screen flex flex-col">
+            {/* Tambahkan sticky, top-0, dan z-50 di sini */}
+            <nav className="sticky top-0 z-50 w-full flex items-center justify-between px-6 py-4 bg-secondary-background border-border border-b-3 backdrop-blur-sm bg-opacity-90">
                 <div className="text-2xl font-bold tracking-tight">
-                    LearnifAI
+                    <Link href="/">LearnifAI</Link>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -72,11 +73,13 @@ export default function NavbarLayout({ children }) {
                                     >
                                         <Avatar className="h-10 w-10">
                                             <AvatarImage
-                                                src={user.avatar}
-                                                alt={user.name}
+                                                src={user?.avatar}
+                                                alt={user?.name}
                                             />
                                             <AvatarFallback>
-                                                {getInitials(user.name)}
+                                                {getInitials(
+                                                    user?.name || "User",
+                                                )}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
@@ -89,10 +92,10 @@ export default function NavbarLayout({ children }) {
                                     <DropdownMenuLabel className="font-normal">
                                         <div className="flex flex-col space-y-1">
                                             <p className="text-sm font-medium leading-none">
-                                                {user.name}
+                                                {user?.name}
                                             </p>
                                             <p className="text-xs leading-none text-muted-foreground">
-                                                {user.email}
+                                                {user?.email}
                                             </p>
                                         </div>
                                     </DropdownMenuLabel>

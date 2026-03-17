@@ -14,36 +14,55 @@ class ModuleController extends Controller
 {
     public function index(Request $request, $course_slug, $module_slug)
     {
-        // 1. Dapatkan Course & Course Module
+        // 1. Dapatkan Course berdasarkan URL
         $course = Course::where('slug', $course_slug)->firstOrFail();
-        $courseModule = CourseModule::where('course_id', $course->id)->firstOrFail();
 
-        // 2. Ambil SEMUA modul beserta materialnya untuk ditampilkan di Sidebar
+        // 2. Langsung cari Active Module berdasarkan slug di URL
+        $activeModule = Module::with('materials')->where('slug', $module_slug)->firstOrFail();
+
+        // 3. Dapatkan Course Module (Bab utama) yang menaungi Active Module ini
+        $courseModule = CourseModule::findOrFail($activeModule->course_modules_id);
+
+        // 4. Pastikan module ini benar-benar milik course yang diakses di URL (Keamanan)
+        if ($courseModule->course_id !== $course->id) {
+            abort(404);
+        }
+
+        // 5. Ambil SEMUA modul beserta materialnya yang satu grup dengan Bab ini untuk Sidebar
         $allModules = Module::with('materials')
             ->where('course_modules_id', $courseModule->id)
             ->get();
 
-        // 3. Tentukan Active Module berdasarkan URL slug
-        $activeModule = $allModules->firstWhere('slug', $module_slug);
-        if (!$activeModule) abort(404);
-
-        // 4. Tentukan Active Material berdasarkan parameter ?l=
+        // 6. Tentukan Active Material berdasarkan parameter ?l=
         $materialSlug = $request->query('l');
         
         if ($materialSlug) {
             $activeMaterial = $activeModule->materials->firstWhere('slug', $materialSlug);
         } else {
-            // Jika tidak ada parameter ?l=, gunakan material pertama dari modul tersebut
             $activeMaterial = $activeModule->materials->first();
         }
 
         if (!$activeMaterial) abort(404);
 
-        // 5. GENERATE KONTEN ON-THE-FLY (Jika belum ada)
+        // 7. GENERATE KONTEN ON-THE-FLY (Jika belum ada)
         if (is_null($activeMaterial->content)) {
-            $prompt = "Buatkan materi pembelajaran yang sangat detail, informatif, dan mudah dipahami untuk topik '{$activeMaterial->title}'. Topik ini adalah bagian dari bab '{$activeModule->title}' dalam kursus '{$course->title}'. Gunakan format Markdown yang rapi (dengan heading, list, atau kode jika relevan). Jangan gunakan block markdown ```markdown di awal dan akhir, berikan langsung teks markdownnya.";
+            
+            // --- UPDATE PROMPT DI SINI ---
+            // Tambahkan deskripsi courseModule agar isi materi tidak keluar jalur
+            $prompt = "Buatkan materi pembelajaran yang ringkas, padat, dan jelas untuk topik '{$activeMaterial->title}'. 
+Topik ini adalah bagian dari bab '{$activeModule->title}' dalam kursus '{$course->title}'. 
+Fokus utama bab ini adalah: \"{$courseModule->description}\". Pastikan materi yang dibuat relevan dengan fokus tersebut.
 
-            $response = Http::timeout(120) // Perpanjang timeout karena generate teks panjang
+Ketentuan SUPER KETAT pembuatan materi:
+1. LANGSUNG BERIKAN ISI MATERI. DILARANG KERAS menambahkan kalimat basa-basi, pengantar, atau penutup (seperti 'Tentu, ini materi pembelajarannya...', 'Berikut adalah...', dsb). Mulailah langsung dengan judul atau isi paragraf pertama!
+2. FORMATTING PARAGRAF: Berikan jeda satu baris kosong (enter 2 kali) di antara setiap paragraf, sub-judul, dan list agar tulisan tidak menumpuk dan nyaman dibaca.
+3. Jangan terlalu panjang, fokus pada inti pembahasan (sekitar 3-4 paragraf atau 300-400 kata).
+4. Penjelasan harus 'to the point' dan mudah dipahami oleh pemula.
+5. Wajib menyertakan poin-poin penting (bullet points) atau contoh singkat untuk memperjelas konsep.
+6. Gunakan format Markdown yang rapi (Gunakan ## untuk Sub Judul, **bold**, list, atau blok kode jika relevan).
+7. Jangan gunakan pembungkus markdown ```markdown di awal dan akhir, berikan langsung teks mentahnya.";
+
+            $response = Http::timeout(120)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post(env('GEMINI_API_URL') . env('GEMINI_API_KEY'), [
                     'contents' => [
@@ -54,7 +73,6 @@ class ModuleController extends Controller
             if ($response->successful()) {
                 $content = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? 'Gagal membuat konten.';
                 
-                // Simpan ke database agar selanjutnya tidak perlu generate ulang
                 $activeMaterial->update([
                     'content' => $content
                 ]);
@@ -63,7 +81,7 @@ class ModuleController extends Controller
             }
         }
 
-        // 6. Kirim data ke Frontend
+        // 8. Kirim data ke Frontend
         return inertia('Modules/Index', [
             'course' => $course,
             'modules' => $allModules,
@@ -86,8 +104,27 @@ class ModuleController extends Controller
 
         $courseSlug = $courseModule->course->slug ?? null;
 
+        $existingModule = Module::where('course_modules_id', $courseModule->id)->first();
+
+        if ($existingModule) {
+            $firstMaterial = Material::where('module_id', $existingModule->id)->first();
+            
+            return redirect()->route('modules.index', [
+                'course_slug' => $courseSlug,
+                'module_slug' => $existingModule->slug,
+                'l' => $firstMaterial->slug ?? null
+            ])->with('info', 'Modul sudah ada, langsung diarahkan.');
+        }
+
+        // --- UPDATE PROMPT DI SINI ---
+        // Sertakan deskripsi agar AI tahu persis ruang lingkup (scope) yang harus di-generate
         $prompt = "
-        Buatkan 5 module tentang topik '{$courseModule->title}' dalam format JSON berikut:
+        Anda adalah pembuat kurikulum. Buatkan 5 module pembelajaran untuk bab '{$courseModule->title}' yang merupakan bagian dari kursus '{$courseModule->course->title}'.
+
+        PENTING: Fokus pembahasan, ruang lingkup, dan materi HARUS mencakup panduan deskripsi berikut:
+        \"{$courseModule->description}\"
+
+        Format output HARUS JSON murni berikut:
         [
             {
                 \"module_title\": \"Judul Modul 1\",
@@ -97,8 +134,8 @@ class ModuleController extends Controller
                 ]
             }
         ]
-        Pastikan menghasilkan 5 module, dan setiap module punya 5 materials.
-        Kembalikan hanya JSON valid.
+        Pastikan menghasilkan tepat 5 module, dan setiap module punya tepat 5 materials.
+        Kembalikan HANYA JSON valid tanpa teks pengantar atau penutup.
         ";
 
         $response = Http::timeout(90)
@@ -133,7 +170,7 @@ class ModuleController extends Controller
                     Material::create([
                         'module_id' => $module->id,
                         'title' => $materialTitle,
-                        'slug' => Str::slug($materialTitle), // Generate slug untuk material
+                        'slug' => Str::slug($materialTitle),
                         'content' => null,
                     ]);
                 }
@@ -143,7 +180,6 @@ class ModuleController extends Controller
         $firstModule = Module::where('course_modules_id', $courseModule->id)->first();
         $firstMaterial = Material::where('module_id', $firstModule->id)->first();
 
-        // Redirect langsung menyertakan parameter ?l=
         return redirect()->route('modules.index', [
             'course_slug' => $courseSlug,
             'module_slug' => $firstModule->slug,

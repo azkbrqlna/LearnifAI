@@ -43,6 +43,22 @@ class CourseController extends Controller
             'topic' => 'required|string|max:255',
         ]);
 
+        // 1. Buat slug dari topik yang diinput
+        $slug = Str::slug($request->topic);
+        $user = $request->user();
+
+        // 2. Cek apakah course dengan slug ini sudah pernah digenerate oleh user
+        $existingCourse = Course::where('slug', $slug)
+            ->where('user_id', $user->id)
+            ->first();
+
+        // 3. Jika sudah ada, langsung redirect ke halaman course tersebut
+        if ($existingCourse) {
+            return redirect()->route('courses.index', ['slug' => $slug])
+                ->with('info', 'Course sudah pernah di-generate sebelumnya.');
+        }
+
+        // --- KODE LAMA DI BAWAH INI TETAP SAMA ---
         $prompt = "
         Buatkan kursus tentang topik '{$request->topic}' dalam format JSON berikut:
         [
@@ -79,7 +95,6 @@ class CourseController extends Controller
 
         $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
-        // Bersihkan markdown JSON jika ada
         $cleaned = preg_replace('/^```json\s*|\s*```$/', '', trim($text));
         $data = json_decode($cleaned, true);
 
@@ -87,11 +102,10 @@ class CourseController extends Controller
             return back()->withErrors(['topic' => 'Invalid response format']);
         }
 
-        // Simpan hasil ke database
         foreach ($data as $courseData) {
             $course = Course::create([
                 'title' => $courseData['title'],
-                'slug' => Str::slug($request->topic),
+                'slug' => $slug, // Menggunakan slug yang sudah dicek di atas
                 'description' => $courseData['description'] ?? null,
                 'user_id' => $request->user()->id,
             ]);
@@ -107,6 +121,6 @@ class CourseController extends Controller
             }
         }
 
-        return redirect()->route('courses.index', ['slug' => Str::slug($request->topic)])->with('success', 'Courses created successfully.');
+        return redirect()->route('courses.index', ['slug' => $slug])->with('success', 'Courses created successfully.');
     }
 }

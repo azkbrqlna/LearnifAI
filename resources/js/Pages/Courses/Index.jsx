@@ -3,13 +3,19 @@ import { Head, usePage, router } from "@inertiajs/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import NavbarLayout from "@/components/layouts/navbar";
+import LoadingOverlay from "@/components/fragments/loading";
+import ErrorModal from "@/components/fragments/error";
 
 export default function CourseDetail() {
     const { course, course_modules } = usePage().props;
     const [loadingModuleTitle, setLoadingModuleTitle] = useState(null);
 
+    // State baru untuk menghandle pesan error
+    const [errorMessage, setErrorMessage] = useState(null);
+
     const handleSubmit = async (moduleTitle) => {
         setLoadingModuleTitle(moduleTitle);
+        setErrorMessage(null); // Reset error saat mencoba lagi
 
         router.post(
             "/modules/generate",
@@ -19,7 +25,11 @@ export default function CourseDetail() {
                 onSuccess: () => router.reload({ only: ["course_modules"] }),
                 onError: (err) => {
                     console.error(err);
-                    alert("Gagal membuat module. Coba lagi.");
+                    // Ganti alert bawaan dengan modal error yang estetik
+                    setErrorMessage(
+                        err.error ||
+                            "Gagal membuat module. AI mungkin sedang sibuk, silakan coba beberapa saat lagi.",
+                    );
                 },
             },
         );
@@ -29,7 +39,15 @@ export default function CourseDetail() {
         <>
             <Head title={course.title} />
             <NavbarLayout>
-                <div className="px-8">
+                <LoadingOverlay isLoading={loadingModuleTitle !== null} />
+
+                <ErrorModal
+                    isOpen={errorMessage !== null}
+                    message={errorMessage}
+                    onClose={() => setErrorMessage(null)}
+                />
+
+                <div className="px-8 py-6">
                     <div className="mb-6">
                         <h1 className="text-xl font-bold mb-3">
                             {course.title}
@@ -46,7 +64,7 @@ export default function CourseDetail() {
                             {course_modules.map((module) => (
                                 <Card
                                     key={module.id}
-                                    className="bg-secondary-background border-3"
+                                    className="bg-secondary-background border-3 flex flex-col"
                                 >
                                     <CardHeader>
                                         <CardTitle>{module.title}</CardTitle>
