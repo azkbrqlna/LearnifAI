@@ -21,7 +21,7 @@ export default function CourseDetail() {
                     console.error(err);
                     alert("Gagal membuat module. Coba lagi.");
                 },
-            }
+            },
         );
     };
 

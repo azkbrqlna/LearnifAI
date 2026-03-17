@@ -31,4 +31,5 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::get('/courses/{course_slug}/{module_slug}', [ModuleController::class, 'index'])
     ->name('modules.index');
 
+
 });

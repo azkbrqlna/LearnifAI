@@ -23,6 +23,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('module_id')->constrained('modules')->onDelete('cascade');
             $table->string('title');
+            $table->string('slug');
             $table->text('content')->nullable();
             $table->timestamps();
         });
