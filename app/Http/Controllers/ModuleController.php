@@ -48,18 +48,31 @@ class ModuleController extends Controller
         if (is_null($activeMaterial->content)) {
             
             // --- UPDATE PROMPT DI SINI ---
-            // Tambahkan deskripsi courseModule agar isi materi tidak keluar jalur
-            $prompt = "Buatkan materi pembelajaran yang ringkas, padat, dan jelas untuk topik '{$activeMaterial->title}'. 
-Topik ini adalah bagian dari bab '{$activeModule->title}' dalam kursus '{$course->title}'. 
-Fokus utama bab ini adalah: \"{$courseModule->description}\". Pastikan materi yang dibuat relevan dengan fokus tersebut.
+            $prompt = "Buatkan materi pembelajaran untuk topik **'{$activeMaterial->title}'**.
+Topik ini adalah bagian dari bab '{$activeModule->title}' dalam kursus '{$course->title}'.
+Fokus utama bab ini adalah: \"{$courseModule->description}\". Pastikan materi relevan dengan fokus tersebut.
 
-Ketentuan SUPER KETAT pembuatan materi:
-1. LANGSUNG BERIKAN ISI MATERI. DILARANG KERAS menambahkan kalimat basa-basi, pengantar, atau penutup (seperti 'Tentu, ini materi pembelajarannya...', 'Berikut adalah...', dsb). Mulailah langsung dengan judul atau isi paragraf pertama!
-2. FORMATTING PARAGRAF: Berikan jeda satu baris kosong (enter 2 kali) di antara setiap paragraf, sub-judul, dan list agar tulisan tidak menumpuk dan nyaman dibaca.
-3. Jangan terlalu panjang, fokus pada inti pembahasan (sekitar 3-4 paragraf atau 300-400 kata).
-4. Penjelasan harus 'to the point' dan mudah dipahami oleh pemula.
-5. Wajib menyertakan poin-poin penting (bullet points) atau contoh singkat untuk memperjelas konsep.
-6. Gunakan format Markdown yang rapi (Gunakan ## untuk Sub Judul, **bold**, list, atau blok kode jika relevan).";
+## ATURAN FORMAT MARKDOWN (WAJIB DIIKUTI):
+
+1. **LANGSUNG MULAI dengan konten.** DILARANG menulis kalimat pengantar seperti 'Tentu saja', 'Berikut adalah', 'Baik, ini materi...', dsb.
+
+2. **STRUKTUR WAJIB:**
+   - Gunakan `## Judul Bagian` untuk setiap sub-bagian utama (minimal 2 sub-bagian)
+   - Gunakan `### Sub-judul` untuk bagian yang lebih kecil jika diperlukan
+   - Setiap paragraf dipisahkan dengan **satu baris kosong**
+   - Tidak ada dua paragraf yang langsung menempel tanpa baris kosong di antaranya
+
+3. **GUNAKAN ELEMEN MARKDOWN INI SESUAI KONTEKS:**
+   - `**teks**` untuk menebalkan istilah penting
+   - `- item` untuk daftar tak berurutan (bullet list)
+   - `1. item` untuk daftar berurutan (numbered list)
+   - `` `kode` `` untuk kode inline
+   - Blok kode dengan triple backtick dan nama bahasa (contoh: \`\`\`python) untuk contoh kode
+   - `> teks` untuk kutipan atau catatan penting
+
+4. **PANJANG:** Sekitar 300-450 kata, padat, dan 'to the point'. Cocok untuk pemula.
+
+5. **AKHIRI** dengan bagian `## Ringkasan` berisi 3-5 poin utama dalam bullet list.";
 
 
             $response = Http::timeout(120)

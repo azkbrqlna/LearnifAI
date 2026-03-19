@@ -32,6 +32,299 @@ import {
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {
+    oneLight,
+    oneDark,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+
+// =========================================================================
+// HOOK: Deteksi dark mode
+// =========================================================================
+function useDarkMode() {
+    const [isDark, setIsDark] = useState(() =>
+        document.documentElement.classList.contains("dark"),
+    );
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsDark(document.documentElement.classList.contains("dark"));
+        });
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class"],
+        });
+        return () => observer.disconnect();
+    }, []);
+
+    return isDark;
+}
+
+// =========================================================================
+// KOMPONEN: Custom Markdown Renderers
+// =========================================================================
+function MarkdownContent({ content }) {
+    const isDark = useDarkMode();
+
+    const components = {
+        // ── Blok kode dengan syntax highlighting ──
+        code({ node, inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || "");
+            const codeString = String(children).replace(/\n$/, "");
+
+            if (!inline && match) {
+                return (
+                    <div className="my-6 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm">
+                        <div className="flex items-center justify-between px-4 py-2 bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
+                            <span className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                                {match[1]}
+                            </span>
+                        </div>
+                        <SyntaxHighlighter
+                            style={isDark ? oneDark : oneLight}
+                            language={match[1]}
+                            PreTag="div"
+                            showLineNumbers={true}
+                            lineNumberStyle={{
+                                minWidth: "2.5em",
+                                paddingRight: "1em",
+                                color: isDark ? "#4b5563" : "#9ca3af",
+                                userSelect: "none",
+                            }}
+                            customStyle={{
+                                margin: 0,
+                                padding: "1rem 1.25rem",
+                                fontSize: "0.8125rem",
+                                lineHeight: "1.6",
+                                background: isDark ? "#18181b" : "#fafafa",
+                            }}
+                            {...props}
+                        >
+                            {codeString}
+                        </SyntaxHighlighter>
+                    </div>
+                );
+            }
+
+            // Inline code
+            return (
+                <code
+                    className="px-1.5 py-0.5 rounded text-[13px] font-mono
+                               bg-zinc-100 dark:bg-zinc-800
+                               text-zinc-800 dark:text-zinc-200
+                               border border-zinc-200 dark:border-zinc-700"
+                    {...props}
+                >
+                    {children}
+                </code>
+            );
+        },
+
+        // ── Heading H2 ──
+        h2({ children }) {
+            return (
+                <h2
+                    className="scroll-mt-20 text-2xl font-bold tracking-tight
+                               text-zinc-900 dark:text-zinc-50
+                               mt-10 mb-4 pb-3
+                               border-b border-zinc-100 dark:border-zinc-800"
+                >
+                    {children}
+                </h2>
+            );
+        },
+
+        // ── Heading H3 ──
+        h3({ children }) {
+            return (
+                <h3
+                    className="scroll-mt-20 text-xl font-bold tracking-tight
+                               text-zinc-800 dark:text-zinc-100
+                               mt-8 mb-3"
+                >
+                    {children}
+                </h3>
+            );
+        },
+
+        // ── Heading H4 ──
+        h4({ children }) {
+            return (
+                <h4
+                    className="text-base font-semibold
+                               text-zinc-800 dark:text-zinc-200
+                               mt-6 mb-2"
+                >
+                    {children}
+                </h4>
+            );
+        },
+
+        // ── Paragraf ──
+        p({ children }) {
+            return (
+                <p
+                    className="text-[15px] leading-relaxed mb-5
+                              text-zinc-600 dark:text-zinc-400"
+                >
+                    {children}
+                </p>
+            );
+        },
+
+        // ── Unordered List ──
+        ul({ children }) {
+            return (
+                <ul className="my-4 space-y-1.5 pl-0 list-none">{children}</ul>
+            );
+        },
+
+        // ── Ordered List ──
+        ol({ children }) {
+            return (
+                <ol className="my-4 space-y-1.5 pl-0 list-none counter-reset-item">
+                    {children}
+                </ol>
+            );
+        },
+
+        // ── List Item ──
+        li({ children, ordered, index }) {
+            return (
+                <li
+                    className="flex items-start gap-2.5 text-[15px] leading-relaxed
+                               text-zinc-600 dark:text-zinc-400"
+                >
+                    <span
+                        className="flex-shrink-0 mt-[5px] w-1.5 h-1.5 rounded-full
+                                     bg-zinc-400 dark:bg-zinc-500"
+                    ></span>
+                    <span>{children}</span>
+                </li>
+            );
+        },
+
+        // ── Blockquote (sebagai callout) ──
+        blockquote({ children }) {
+            return (
+                <blockquote
+                    className="my-6 flex gap-3 items-start
+                                       rounded-xl p-4
+                                       bg-zinc-50 dark:bg-zinc-900
+                                       border border-zinc-200 dark:border-zinc-700
+                                       border-l-4 border-l-zinc-400 dark:border-l-zinc-500
+                                       not-italic"
+                >
+                    <span className="flex-shrink-0 text-base mt-0.5">💡</span>
+                    <div
+                        className="text-[14px] leading-relaxed
+                                    text-zinc-600 dark:text-zinc-400 [&>p]:mb-0"
+                    >
+                        {children}
+                    </div>
+                </blockquote>
+            );
+        },
+
+        // ── Strong / Bold ──
+        strong({ children }) {
+            return (
+                <strong className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    {children}
+                </strong>
+            );
+        },
+
+        // ── Link ──
+        a({ href, children }) {
+            return (
+                <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-900 dark:text-zinc-200
+                               underline underline-offset-2
+                               decoration-zinc-300 dark:decoration-zinc-600
+                               hover:decoration-zinc-700 dark:hover:decoration-zinc-300
+                               transition-all"
+                >
+                    {children}
+                </a>
+            );
+        },
+
+        // ── Horizontal Rule ──
+        hr() {
+            return <hr className="my-8 border-zinc-100 dark:border-zinc-800" />;
+        },
+
+        // ── Tabel ──
+        table({ children }) {
+            return (
+                <div
+                    className="my-6 overflow-x-auto rounded-xl border
+                                border-zinc-200 dark:border-zinc-700"
+                >
+                    <table className="w-full text-sm border-collapse">
+                        {children}
+                    </table>
+                </div>
+            );
+        },
+
+        thead({ children }) {
+            return (
+                <thead className="bg-zinc-50 dark:bg-zinc-800/60">
+                    {children}
+                </thead>
+            );
+        },
+
+        th({ children }) {
+            return (
+                <th
+                    className="px-4 py-3 text-left text-xs font-semibold
+                               uppercase tracking-wider
+                               text-zinc-700 dark:text-zinc-300
+                               border-b border-zinc-200 dark:border-zinc-700"
+                >
+                    {children}
+                </th>
+            );
+        },
+
+        td({ children }) {
+            return (
+                <td
+                    className="px-4 py-3 text-[14px]
+                               text-zinc-600 dark:text-zinc-400
+                               border-b border-zinc-100 dark:border-zinc-800
+                               last:border-b-0"
+                >
+                    {children}
+                </td>
+            );
+        },
+
+        // ── Gambar ──
+        img({ src, alt }) {
+            return (
+                <img
+                    src={src}
+                    alt={alt}
+                    className="my-6 rounded-xl shadow-sm w-full object-cover
+                               border border-zinc-100 dark:border-zinc-800"
+                />
+            );
+        },
+    };
+
+    return (
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+            {content}
+        </ReactMarkdown>
+    );
+}
 
 // =========================================================================
 // KOMPONEN SIDEBAR
@@ -165,6 +458,9 @@ function CourseSidebar({ course, modules, activeModule, activeMaterial }) {
     );
 }
 
+// =========================================================================
+// HALAMAN UTAMA
+// =========================================================================
 export default function ModuleIndex({
     course,
     modules,
@@ -210,7 +506,7 @@ export default function ModuleIndex({
                 />
 
                 {/* ── MAIN INSET ── */}
-                <SidebarInset className="flex flex-col border-2 dark:border-zinc-800 min-h-full bg-white dark:bg-zinc-950 rounded-xl overflow-hidden ">
+                <SidebarInset className="flex flex-col border-2 dark:border-zinc-800 min-h-full bg-white dark:bg-zinc-950 rounded-xl overflow-hidden">
                     {/* ── HEADER SEKUNDER ── */}
                     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm px-5 border-b border-zinc-100 dark:border-zinc-800">
                         <SidebarTrigger />
@@ -234,9 +530,6 @@ export default function ModuleIndex({
                         <div className="max-w-3xl mx-auto px-6 py-12 md:px-10 md:py-16">
                             {/* Judul Materi */}
                             <div className="mb-10">
-                                <p className="text-[11px] font-bold tracking-widest uppercase text-zinc-400 dark:text-zinc-500 mb-3">
-                                    {activeModule.title}
-                                </p>
                                 <h1 className="text-3xl md:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight">
                                     {activeMaterial.title}
                                 </h1>
@@ -245,45 +538,9 @@ export default function ModuleIndex({
 
                             {/* Body Konten Markdown */}
                             {activeMaterial.content ? (
-                                <div
-                                    className={`
-                                    prose max-w-none dark:prose-invert
-                                    prose-headings:font-bold prose-headings:tracking-tight
-                                    prose-headings:text-zinc-900 dark:prose-headings:text-zinc-50
-                                    prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-                                    prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-                                    prose-p:text-zinc-600 dark:prose-p:text-zinc-400
-                                    prose-p:leading-relaxed prose-p:mb-5 prose-p:text-[15px]
-                                    prose-a:text-zinc-900 dark:prose-a:text-zinc-200
-                                    prose-a:underline prose-a:underline-offset-2
-                                    prose-a:decoration-zinc-300 dark:prose-a:decoration-zinc-600
-                                    hover:prose-a:decoration-zinc-700 dark:hover:prose-a:decoration-zinc-300
-                                    prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-semibold
-                                    prose-li:text-zinc-600 dark:prose-li:text-zinc-400
-                                    prose-li:text-[15px] prose-li:leading-relaxed
-                                    prose-ul:my-4 prose-ol:my-4
-                                    prose-blockquote:border-l-2
-                                    prose-blockquote:border-zinc-300 dark:prose-blockquote:border-zinc-600
-                                    prose-blockquote:pl-4 prose-blockquote:not-italic
-                                    prose-blockquote:text-zinc-500 dark:prose-blockquote:text-zinc-400
-                                    prose-code:text-zinc-800 dark:prose-code:text-zinc-200
-                                    prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800
-                                    prose-code:rounded prose-code:px-1.5 prose-code:py-0.5
-                                    prose-code:text-[13px] prose-code:font-mono
-                                    prose-pre:bg-zinc-900 dark:prose-pre:bg-zinc-800/80
-                                    prose-pre:text-zinc-100 prose-pre:rounded-xl
-                                    prose-pre:shadow-sm prose-pre:text-[13px]
-                                    prose-img:rounded-xl prose-img:shadow-sm
-                                    prose-hr:border-zinc-100 dark:prose-hr:border-zinc-800 prose-hr:my-8
-                                    prose-table:text-sm
-                                    prose-th:text-zinc-800 dark:prose-th:text-zinc-200 prose-th:font-semibold
-                                    prose-td:text-zinc-600 dark:prose-td:text-zinc-400
-                                `}
-                                >
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {activeMaterial.content}
-                                    </ReactMarkdown>
-                                </div>
+                                <MarkdownContent
+                                    content={activeMaterial.content}
+                                />
                             ) : (
                                 /* Empty state */
                                 <div className="flex flex-col items-center justify-center py-24 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
