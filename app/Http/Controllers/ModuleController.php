@@ -59,8 +59,8 @@ Ketentuan SUPER KETAT pembuatan materi:
 3. Jangan terlalu panjang, fokus pada inti pembahasan (sekitar 3-4 paragraf atau 300-400 kata).
 4. Penjelasan harus 'to the point' dan mudah dipahami oleh pemula.
 5. Wajib menyertakan poin-poin penting (bullet points) atau contoh singkat untuk memperjelas konsep.
-6. Gunakan format Markdown yang rapi (Gunakan ## untuk Sub Judul, **bold**, list, atau blok kode jika relevan).
-7. Jangan gunakan pembungkus markdown ```markdown di awal dan akhir, berikan langsung teks mentahnya.";
+6. Gunakan format Markdown yang rapi (Gunakan ## untuk Sub Judul, **bold**, list, atau blok kode jika relevan).";
+
 
             $response = Http::timeout(120)
                 ->withHeaders(['Content-Type' => 'application/json'])
